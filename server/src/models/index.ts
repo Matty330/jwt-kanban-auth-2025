@@ -7,8 +7,9 @@ import { TicketFactory } from './ticket.js';
 
 const sequelize = process.env.DB_URL
   ? new Sequelize(process.env.DB_URL)
-  : new Sequelize(process.env.DB_NAME || '', process.env.DB_USER || '', process.env.DB_PASSWORD, {
-      host: 'localhost',
+  : new Sequelize(process.env.DB_NAME || '', process.env.DB_USER || '', process.env.DB_PASS || '', { // Fixed `DB_PASS`
+      host: process.env.DB_HOST || 'localhost',
+      port: Number(process.env.DB_PORT) || 5432, // Ensure port is read as a number
       dialect: 'postgres',
       dialectOptions: {
         decimalNumbers: true,
@@ -19,6 +20,6 @@ const User = UserFactory(sequelize);
 const Ticket = TicketFactory(sequelize);
 
 User.hasMany(Ticket, { foreignKey: 'assignedUserId' });
-Ticket.belongsTo(User, { foreignKey: 'assignedUserId', as: 'assignedUser'});
+Ticket.belongsTo(User, { foreignKey: 'assignedUserId', as: 'assignedUser' });
 
 export { sequelize, User, Ticket };
