@@ -1,31 +1,43 @@
-import { JwtPayload, jwtDecode } from 'jwt-decode';
+export const AuthService = {
+  login: async (username: string, password: string) => {
+    try {
+      const response = await fetch('/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
 
-class AuthService {
-  getProfile() {
-    // TODO: return the decoded token
-  }
+      if (!response.ok) {
+        throw new Error('Login failed. Check credentials.');
+      }
 
-  loggedIn() {
-    // TODO: return a value that indicates if the user is logged in
-  }
-  
-  isTokenExpired(token: string) {
-    // TODO: return a value that indicates if the token is expired
-  }
+      const data = await response.json();
+      const token = data.token;
 
-  getToken(): string {
-    // TODO: return the token
-  }
+      if (token) {
+        localStorage.setItem('token', token); // ✅ Save JWT in localStorage
+      }
 
-  login(idToken: string) {
-    // TODO: set the token to localStorage
-    // TODO: redirect to the home page
-  }
+      return token;
+    } catch (error) {
+      console.error('Login error:', error);
+      return null;
+    }
+  },
 
-  logout() {
-    // TODO: remove the token from localStorage
-    // TODO: redirect to the login page
-  }
-}
+  logout: () => {
+    localStorage.removeItem('token'); // ✅ Remove JWT on logout
+  },
 
-export default new AuthService();
+  getToken: (): string | null => {
+    return localStorage.getItem('token'); // ✅ Retrieve JWT token
+  },
+
+  isAuthenticated: (): boolean => {
+    return !!localStorage.getItem('token'); // ✅ Check if token exists
+  },
+};
+
+export default AuthService; // ✅ Ensure AuthService is correctly exported

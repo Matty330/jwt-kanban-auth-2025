@@ -1,55 +1,34 @@
-import { useState, FormEvent, ChangeEvent } from "react";
-
-import Auth from '../utils/auth';
-import { login } from "../api/authAPI";
+import { useState } from "react";
+import { AuthService } from "../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [loginData, setLoginData] = useState({
-    username: '',
-    password: ''
-  });
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setLoginData({
-      ...loginData,
-      [name]: value
-    });
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const data = await login(loginData);
-      Auth.login(data.token);
-    } catch (err) {
-      console.error('Failed to login', err);
+    const token = await AuthService.login(username, password);
+    if (token) {
+      navigate("/kanban"); // Redirect to Kanban Board
+    } else {
+      setError("Invalid credentials. Please try again.");
     }
   };
 
   return (
-    <div className='container'>
-      <form className='form' onSubmit={handleSubmit}>
-        <h1>Login</h1>
-        <label >Username</label>
-        <input 
-          type='text'
-          name='username'
-          value={loginData.username || ''}
-          onChange={handleChange}
-        />
-      <label>Password</label>
-        <input 
-          type='password'
-          name='password'
-          value={loginData.password || ''}
-          onChange={handleChange}
-        />
-        <button type='submit'>Submit Form</button>
+    <div>
+      <h2>Login</h2>
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <form onSubmit={handleLogin}>
+        <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <button type="submit">Login</button>
       </form>
     </div>
-    
-  )
+  );
 };
 
 export default Login;

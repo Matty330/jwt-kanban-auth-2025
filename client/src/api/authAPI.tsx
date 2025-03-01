@@ -1,9 +1,20 @@
-import { UserLogin } from "../interfaces/UserLogin";
+export const login = async (username: string, password: string) => {
+  try {
+    const response = await fetch("http://localhost:3001/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
 
-const login = async (userInfo: UserLogin) => {
-  // TODO: make a POST request to the login route
-}
+    const data = await response.json();
 
+    if (!response.ok) {
+      throw new Error(data.message || "Login failed");
+    }
 
-
-export { login };
+    return data.token; // Return the JWT token
+  } catch (error) {
+    console.error("Login error:", error);
+    return null;
+  }
+};
